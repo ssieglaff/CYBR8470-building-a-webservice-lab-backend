@@ -150,6 +150,7 @@ class Events(APIView):
 
         try:
             newEvent.clean_fields()
+            
         except ValidationError as e:
             print e
             return Response({'success':False, 'error':e}, status=status.HTTP_400_BAD_REQUEST)
