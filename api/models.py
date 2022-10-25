@@ -9,7 +9,7 @@ from django.contrib.auth.models import User, Group
 from django.contrib import admin
 import base64
 
-from numpy import size
+# from numpy import size
 
 # Validators for model fields
 alphaNumericValidator = RegexValidator(regex='^[a-zA-Z0-9]+$')
@@ -29,8 +29,8 @@ class Event(models.Model):
     def __str__(self):
         return str(self.eventtype)
 
-    class EventAdmin(admin.ModelAdmin):
-        list_display = ('eventtype', 'timestamp')
+class EventAdmin(admin.ModelAdmin):
+    list_display = ('eventtype', 'timestamp')
 
 class ApiKey(models.Model):
     owner = models.CharField(max_length=1000, blank=False)
@@ -39,12 +39,12 @@ class ApiKey(models.Model):
     def __str__(self):
         return str(self.owner) + str(self.key)
         
-    class ApiKeyAdmin(admin.ModelAdmin):
-        list_display = ('owner','key')
+class ApiKeyAdmin(admin.ModelAdmin):
+    list_display = ('owner','key')
 
 
 class Breed(models.Model):
-    name = models.CharField(validators=[alphaNumericValidator], max_length=30, blank=False)
+    name = models.CharField(validators=[alphaNumericSpaceValidator], max_length=30, blank=False)
     size = models.CharField(validators=[sizeCategoryValidator], max_length=7, blank=False)
     friendliness = models.IntegerField(validators=range1to5Validator)
     trainability = models.IntegerField(validators=range1to5Validator)
@@ -58,7 +58,7 @@ class Breed(models.Model):
         list_display = ('name', 'size', 'friendliness', 'trainability', 'sheddingammount', 'exerciseneeds')
 
 class Dog(models.Model):
-    name = models.CharField(validators=[alphaNumericValidator], max_length=30, blank=False)
+    name = models.CharField(validators=[alphaNumericSpaceValidator], max_length=30, blank=False)
     age = models.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(oldestDogEver + 1)])
     breed = models.ForeignKey('Breed', on_delete=models.CASCADE, blank=False)
     gender = models.CharField(validators=[alphaNumericValidator], max_length=30)

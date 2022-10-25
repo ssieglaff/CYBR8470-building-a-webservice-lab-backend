@@ -190,7 +190,7 @@ class ActivateIFTTT(APIView):
         #send the new event to IFTTT and print the result
         event_req = requests.post('https://maker.ifttt.com/trigger/'+str(event_hook)+'/with/key/'+api_key.key, data= {
             'value1' : timestamp,
-            'value2':  "\""+str(eventtype)+"\"",
+            'value2' : "\""+str(eventtype)+"\"",
             'value3' : "\""+str(requestor)+"\""
         })
         print event_req.text
@@ -205,4 +205,87 @@ class ActivateIFTTT(APIView):
         #log the event in the DB
         newEvent.save()
         print 'New Event Logged'
+        return Response({'success': True}, status=status.HTTP_200_OK)
+
+class DogDetail(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, dog_id, format=None):
+        return HttpResponse(serializers.serialize('json', get_object_or_404(Dog, pk=dog_id)), content_type='json')
+
+    def put(self, request, format=None):
+        dog = get_object_or_404(Dog, pk=id)
+
+        dog.name = request.data.get('name')
+        dog.age = int(request.data.get('age'))
+        dog.breed = get_object_or_404(Breed, pk=int(request.data.get('breed')))
+        dog.gender = request.data.get('gender')
+        dog.color = request.data.get('color')
+        dog.favoritefood = request.data.get('favoritefood')
+        dog.favoritetoy = request.data.get('favoritetoy')
+
+        try:
+            dog.clean_fields()
+        except ValidationError as e:
+            return Response("Invalid Entry", status=status.HTTP_400_BAD_REQUEST)
+        
+        dog.save()
+        return Response({'success': True}, status=status.HTTP_200_OK)
+
+    def delete(self, request, format=None):
+        dog = get_object_or_404(Dog, pk=id)
+        dog.delete()
+        return Response({'success': True}, status=status.HTTP_200_OK)
+
+class DogList(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, format=None):
+        allDogs = Dog.objects.all()
+        return HttpResponse(serializers.serialize('json', allDogs), content_type='json')
+
+    def post(self, request, format=None):
+        newDog = Dog(
+            name = request.data.get('name'),
+            age = int(request.data.get('age')),
+            breed = get_object_or_404(Breed, pk=int(request.data.get('breed'))),
+            gender = request.data.get('gender'),
+            color = request.data.get('color'),
+            favoritefood = request.data.get('favoritefood'),
+            favoritetoy = request.data.get('favoritetoy')
+        )
+        try:
+            newDog.clean_fields()
+        except ValidationError as e:
+            return Response("Invalid Entry", status=status.HTTP_400_BAD_REQUEST)
+        
+        newDog.save()
+        return Response({'success': True}, status=status.HTTP_200_OK)
+
+
+class BreedDetail(APIView):
+    permission_classes = (AllowAny,)
+
+class BreedList(APIView):
+    permission_classes = (AllowAny,)
+
+    def get(self, request, format=None):
+        allBreeds = Breed.objects.all()
+        return HttpResponse(serializers.serialize('json', allBreeds), content_type='json')
+
+    def post(self, request, format=None):
+        newBreed = Breed(
+            name = request.data.get('name'),
+            size = request.data.get('size'),
+            friendliness = int(request.data.get('friendliness')),
+            trainability = int(request.data.get('trainability')),
+            sheddingammount = int(request.data.get('sheddingammount')),
+            exerciseneeds = int(request.data.get('exerciseneeds'))
+            )
+        try:
+            newBreed.clean_fields()
+        except ValidationError as e:
+            return Response("Invalid Entry", status=status.HTTP_400_BAD_REQUEST)
+        
+        newBreed.save()
         return Response({'success': True}, status=status.HTTP_200_OK)
