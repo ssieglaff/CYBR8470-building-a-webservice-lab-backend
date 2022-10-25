@@ -210,11 +210,11 @@ class ActivateIFTTT(APIView):
 class DogDetail(APIView):
     permission_classes = (AllowAny,)
 
-    def get(self, dog_id, format=None):
-        return HttpResponse(serializers.serialize('json', get_object_or_404(Dog, pk=dog_id)), content_type='json')
+    def get(self, request, dog_id, format=None):
+        return HttpResponse(serializers.serialize('json', Dog.objects.filter(pk=dog_id)), content_type='json')
 
-    def put(self, request, format=None):
-        dog = get_object_or_404(Dog, pk=id)
+    def put(self, request, dog_id, format=None):
+        dog = get_object_or_404(Dog, pk=dog_id)
 
         dog.name = request.data.get('name')
         dog.age = int(request.data.get('age'))
@@ -232,8 +232,8 @@ class DogDetail(APIView):
         dog.save()
         return Response({'success': True}, status=status.HTTP_200_OK)
 
-    def delete(self, request, format=None):
-        dog = get_object_or_404(Dog, pk=id)
+    def delete(self, request, dog_id, format=None):
+        dog = get_object_or_404(Dog, pk=dog_id)
         dog.delete()
         return Response({'success': True}, status=status.HTTP_200_OK)
 
@@ -265,6 +265,32 @@ class DogList(APIView):
 
 class BreedDetail(APIView):
     permission_classes = (AllowAny,)
+
+    def get(self, request, breed_id, format=None):
+        return HttpResponse(serializers.serialize('json', Breed.objects.filter(pk=breed_id)), content_type='json')
+
+    def put(self, request, breed_id, format=None):
+        breed = get_object_or_404(Breed, pk=breed_id)
+
+        breed.name = request.data.get('name')
+        breed.size = request.data.get('size')
+        breed.friendliness = int(request.data.get('friendliness'))
+        breed.trainability = int(request.data.get('trainability'))
+        breed.sheddingammount = int(request.data.get('sheddingammount'))
+        breed.exerciseneeds = int(request.data.get('exerciseneeds'))
+        
+        try:
+            breed.clean_fields()
+        except ValidationError as e:
+            return Response("Invalid Entry", status=status.HTTP_400_BAD_REQUEST)
+        
+        breed.save()
+        return Response({'success': True}, status=status.HTTP_200_OK)
+
+    def delete(self, request, breed_id, format=None):
+        breed = get_object_or_404(Breed, pk=breed_id)
+        breed.delete()
+        return Response({'success': True}, status=status.HTTP_200_OK)
 
 class BreedList(APIView):
     permission_classes = (AllowAny,)
